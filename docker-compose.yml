@@ -55,6 +55,19 @@ services:
     entrypoint: [ "/bin/sh", "/init.sh" ]
     restart: "no"
 
+  stt-service:
+    build: ./stt-service
+    container_name: meeting-stt
+    environment:
+      HF_TOKEN: ${HF_TOKEN}
+      WHISPER_MODEL: small
+    ports:
+      - "8000:8000"
+    volumes:
+      - meeting_stt_cache:/root/.cache
+    restart: unless-stopped
+
 volumes:
   meeting_postgres_data:
   meeting_minio_data:
+  meeting_stt_cache:
