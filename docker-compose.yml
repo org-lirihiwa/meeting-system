@@ -1,20 +1,31 @@
 services:
-  db:
-    image: postgres:17
-    container_name: meeting-db
-    environment:
-      POSTGRES_DB: meetings
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: change_me
-    ports:
-      - "5432:5432"
-    volumes:
-      - meeting_postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app -d meetings"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+    db:
+        image: postgres:17
+        container_name: meeting-db
+        environment:
+            POSTGRES_DB: meetings
+            POSTGRES_USER: app
+            POSTGRES_PASSWORD: change_me
+        ports:
+            - "5432:5432"
+        volumes:
+            - meeting_postgres_data:/var/lib/postgresql/data
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U app -d meetings" ]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+
+    rabbitmq:
+        image: rabbitmq:3.13-management-alpine
+        container_name: meeting-rabbitmq
+        environment:
+            RABBITMQ_DEFAULT_USER: app
+            RABBITMQ_DEFAULT_PASS: change_me
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        restart: unless-stopped
 
 volumes:
-  meeting_postgres_data:
+    meeting_postgres_data:

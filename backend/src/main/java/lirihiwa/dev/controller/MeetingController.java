@@ -3,8 +3,10 @@ package lirihiwa.dev.controller;
 import lirihiwa.dev.meeting.Meeting;
 import lirihiwa.dev.meeting.MeetingRepository;
 import lirihiwa.dev.meeting.dto.CreateMeetingRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -30,12 +32,21 @@ public class MeetingController {
 
     @PostMapping
     public Meeting createMeeting(@RequestBody CreateMeetingRequest request) {
-        Meeting meeting = new Meeting(request.title());
+        Meeting meeting = new Meeting(request.title(), request.description(), request.meetingDate());
         return meetingRepository.save(meeting);
     }
 
     @GetMapping
     public List<Meeting> getMeetings() {
         return meetingRepository.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public Meeting getMeeting(@PathVariable Long id) {
+        return meetingRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Meeting not found"
+                ));
     }
 }
