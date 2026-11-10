@@ -1,5 +1,8 @@
 package lirihiwa.dev.controller;
 
+import lirihiwa.dev.service.MeetingService;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
 import lirihiwa.dev.meeting.Meeting;
 import lirihiwa.dev.meeting.MeetingRepository;
 import lirihiwa.dev.meeting.dto.CreateMeetingRequest;
@@ -16,10 +19,14 @@ public class MeetingController {
 
     private final JdbcTemplate jdbcTemplate;
     private final MeetingRepository meetingRepository;
+    private final MeetingService meetingService;
 
-    public MeetingController(JdbcTemplate jdbcTemplate, MeetingRepository meetingRepository) {
+    public MeetingController(JdbcTemplate jdbcTemplate,
+                             MeetingRepository meetingRepository,
+                             MeetingService meetingService) {
         this.jdbcTemplate = jdbcTemplate;
         this.meetingRepository = meetingRepository;
+        this.meetingService = meetingService;
     }
 
     @GetMapping("/health/db")
@@ -48,5 +55,10 @@ public class MeetingController {
                         HttpStatus.NOT_FOUND,
                         "Meeting not found"
                 ));
+    }
+
+    @PostMapping(value = "/{id}/audio", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Meeting uploadAudio(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        return meetingService.uploadAudio(id, file);
     }
 }
