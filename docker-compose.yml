@@ -67,7 +67,17 @@ services:
       - meeting_stt_cache:/root/.cache
     restart: unless-stopped
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: meeting-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - meeting_ollama_data:/root/.ollama
+    restart: unless-stopped
+
 volumes:
   meeting_postgres_data:
   meeting_minio_data:
   meeting_stt_cache:
+  meeting_ollama_data:
