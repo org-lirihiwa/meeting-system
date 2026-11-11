@@ -7,6 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import io.minio.GetObjectArgs;
+
+import java.io.InputStream;
 
 import java.util.UUID;
 
@@ -40,5 +43,22 @@ public class FileStorageService {
             );
         }
         return objectKey;
+    }
+
+    public InputStream download(String objectKey) {
+        try {
+            return minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(objectKey)
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to download file",
+                    e
+            );
+        }
     }
 }
