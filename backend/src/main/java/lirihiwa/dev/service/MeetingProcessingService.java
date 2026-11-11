@@ -46,6 +46,12 @@ public class MeetingProcessingService {
         if (meeting == null || meeting.getAudioUrl() == null) {
             return null;
         }
+
+        taskRepository.deleteByMeetingId(meetingId);
+        transcriptRepository.deleteByMeetingId(meetingId);
+        speakerRepository.deleteByMeetingId(meetingId);
+
+        meeting.setStatus(MeetingStatus.PROCESSING);
         return meeting.getAudioUrl();
     }
 

@@ -8,9 +8,13 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component
 public class TaskExtractor {
 
+    private static final Logger log = LoggerFactory.getLogger(TaskExtractor.class);
     private static final String SYSTEM_PROMPT = """
             Ты помощник секретаря. Из расшифровки совещания выдели поручения: \
             кому, что и к какому сроку нужно сделать.
@@ -31,6 +35,7 @@ public class TaskExtractor {
     private final LlmClient llmClient;
     private final ObjectMapper objectMapper;
 
+
     public TaskExtractor(LlmClient llmClient, ObjectMapper objectMapper) {
         this.llmClient = llmClient;
         this.objectMapper = objectMapper;
@@ -46,6 +51,7 @@ public class TaskExtractor {
         }
 
         String json = llmClient.generateJson(SYSTEM_PROMPT, transcript.toString());
+        log.info("LLM raw response: {}", json);
         try {
             JsonNode tasks = objectMapper.readTree(json).path("tasks");
             if (!tasks.isArray()) {

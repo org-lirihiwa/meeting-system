@@ -7,4 +7,6 @@ import java.util.List;
 public interface SpeakerRepository extends JpaRepository<Speaker, Long> {
 
     List<Speaker> findByMeetingId(Long meetingId);
+
+    void deleteByMeetingId(Long meetingId);
 }

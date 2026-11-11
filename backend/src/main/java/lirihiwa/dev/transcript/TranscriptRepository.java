@@ -7,4 +7,6 @@ import java.util.List;
 public interface TranscriptRepository extends JpaRepository<Transcript, Long> {
 
     List<Transcript> findByMeetingIdOrderByStartOffsetAsc(Long meetingId);
+
+    void deleteByMeetingId(Long meetingId);
 }
