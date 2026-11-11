@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lirihiwa.dev.ai.llm.ExtractedTask;
 import lirihiwa.dev.task.Task;
 import lirihiwa.dev.task.TaskRepository;
+import lirihiwa.dev.employee.EmployeeRepository;
 
 import java.util.List;
 
@@ -27,14 +28,16 @@ public class MeetingProcessingService {
     private final SpeakerRepository speakerRepository;
     private final TranscriptRepository transcriptRepository;
     private final TaskRepository taskRepository;
+    private final EmployeeRepository employeeRepository;
 
     public MeetingProcessingService(MeetingRepository meetingRepository,
                                     SpeakerRepository speakerRepository,
-                                    TranscriptRepository transcriptRepository, TaskRepository taskRepository) {
+                                    TranscriptRepository transcriptRepository, TaskRepository taskRepository, EmployeeRepository employeeRepository) {
         this.meetingRepository = meetingRepository;
         this.speakerRepository = speakerRepository;
         this.transcriptRepository = transcriptRepository;
         this.taskRepository = taskRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     /**
@@ -94,11 +97,12 @@ public class MeetingProcessingService {
     }
 
     @Transactional
-    public void saveTasks(Long meetingId, List<ExtractedTask> extracted) {
+    public void saveTasks(Long meetingId, List<ResolvedTask> resolved) {
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow();
         List<Transcript> transcripts = transcriptRepository.findByMeetingIdOrderByStartOffsetAsc(meetingId);
 
-        for (ExtractedTask item : extracted) {
+        for (ResolvedTask resolvedTask : resolved) {
+            ExtractedTask item = resolvedTask.task();
             if (item.text() == null || item.text().isBlank()) {
                 continue;
             }
@@ -107,10 +111,14 @@ public class MeetingProcessingService {
             if (index != null && index >= 0 && index < transcripts.size()) {
                 source = transcripts.get(index);
             }
-            taskRepository.save(new Task(
+            Task task = new Task(
                     meeting, source, item.assignee(), item.text(),
                     item.topic(), item.territory(), item.deadline()
-            ));
+            );
+            if (resolvedTask.employeeId() != null) {
+                task.setEmployee(employeeRepository.getReferenceById(resolvedTask.employeeId()));
+            }
+            taskRepository.save(task);
         }
 
         meeting.setStatus(MeetingStatus.COMPLETED);
