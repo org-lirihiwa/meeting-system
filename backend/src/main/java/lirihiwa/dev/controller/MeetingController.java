@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import lirihiwa.dev.meeting.dto.ProtocolResponse;
+import lirihiwa.dev.service.ProtocolService;
 
 import java.util.List;
 
@@ -20,13 +22,16 @@ public class MeetingController {
     private final JdbcTemplate jdbcTemplate;
     private final MeetingRepository meetingRepository;
     private final MeetingService meetingService;
+    private final ProtocolService protocolService;
 
     public MeetingController(JdbcTemplate jdbcTemplate,
                              MeetingRepository meetingRepository,
-                             MeetingService meetingService) {
+                             MeetingService meetingService,
+                             ProtocolService protocolService) {
         this.jdbcTemplate = jdbcTemplate;
         this.meetingRepository = meetingRepository;
         this.meetingService = meetingService;
+        this.protocolService = protocolService;
     }
 
     @GetMapping("/health/db")
@@ -60,5 +65,10 @@ public class MeetingController {
     @PostMapping(value = "/{id}/audio", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Meeting uploadAudio(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
         return meetingService.uploadAudio(id, file);
+    }
+
+    @GetMapping("/{id}/protocol")
+    public ProtocolResponse getProtocol(@PathVariable Long id) {
+        return protocolService.getProtocol(id);
     }
 }
