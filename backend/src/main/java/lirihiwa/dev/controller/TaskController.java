@@ -1,6 +1,7 @@
 package lirihiwa.dev.controller;
 
 import lirihiwa.dev.service.TaskService;
+import lirihiwa.dev.task.dto.AssignEmployeeRequest;
 import lirihiwa.dev.task.dto.TaskResponse;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,5 +30,10 @@ public class TaskController {
     @PostMapping("/tasks/{id}/reject")
     public TaskResponse reject(@PathVariable Long id) {
         return taskService.reject(id);
+    }
+
+    @PutMapping("/tasks/{id}/assignee")
+    public TaskResponse assign(@PathVariable Long id, @RequestBody AssignEmployeeRequest request) {
+        return taskService.assign(id, request.employeeId());
     }
 }

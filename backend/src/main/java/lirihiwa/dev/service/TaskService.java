@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.mail.MailException;
+import lirihiwa.dev.employee.Employee;
+import lirihiwa.dev.employee.EmployeeRepository;
 
 import java.util.List;
 
@@ -17,10 +19,12 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final NotificationService notificationService;
+    private final EmployeeRepository employeeRepository;
 
-    public TaskService(TaskRepository taskRepository, NotificationService notificationService) {
+    public TaskService(TaskRepository taskRepository, NotificationService notificationService, EmployeeRepository employeeRepository) {
         this.taskRepository = taskRepository;
         this.notificationService = notificationService;
+        this.employeeRepository = employeeRepository;
     }
 
     @Transactional(readOnly = true)
@@ -67,5 +71,20 @@ public class TaskService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Task is not in DRAFT status");
         }
         return task;
+    }
+
+    @Transactional
+    public TaskResponse assign(Long taskId, Long employeeId) {
+        Task task = findDraft(taskId);
+        if (employeeId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "employeeId is required");
+        }
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
+        if (!employee.isActive()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Employee is not active");
+        }
+        task.setEmployee(employee);
+        return TaskResponse.from(task);
     }
 }
